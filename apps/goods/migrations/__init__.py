@@ -1,2 +1,1 @@
-# -*- coding: utf-8 -*-  
-__author__ = 'style'
+__author__ = 'admin'

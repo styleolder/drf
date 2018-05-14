@@ -30,7 +30,25 @@ class GoodsCategoryBrandAdmin(object):
 
 
 class GoodsAdmin(object):
-    fields = ['name', 'good_sn', 'add_time']
+    fields = [
+        "category",
+        "name",
+        "good_sn",
+        "desc",
+        "brand",
+        "add_time",
+        "click_num",
+        "sold_num",
+        "fav_num",
+        "goods_num",
+        "market_price",
+        "shop_price",
+        "good_desc",
+        "ship_free",
+        "good_front_image",
+        "is_new",
+        "is_hot"
+    ]
     search_fields = ['name']
     list_filter = [
         "category",
