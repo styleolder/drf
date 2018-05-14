@@ -68,7 +68,9 @@ class Goods(models.Model):
     goods_num = models.IntegerField(default=0, verbose_name="商品库存数")
     market_price = models.FloatField(default=0.0, verbose_name="市场价格")
     shop_price = models.FloatField(default=0.0, verbose_name="商品价格")
-    good_desc = UEditorField(u'内容	', width=600, height=300, toolbars="full", imagePath="images/%(basename)s_%(datetime)s.%(extname)s", filePath="", blank=True)
+    good_desc = UEditorField('内容', height=300, width=800,max_length=1024000000000,
+                           default=u'', blank=True, imagePath="images/",
+                           toolbars='besttome', filePath='files/')
     ship_free = models.BooleanField(default=True, verbose_name="是否承担运费")
     good_front_image = models.ImageField(upload_to="", verbose_name="封面图片")
     is_new = models.BooleanField(default=False, verbose_name="是否为新品")

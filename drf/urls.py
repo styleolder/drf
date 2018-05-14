@@ -14,14 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
-# from django.contrib import admin
+from drf.settings import MEDIA_ROOT
 import xadmin
-from django.conf.urls.static import static
-from django.conf import settings
+from django.conf.urls.static import serve
 
 
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
     url(r'^ueditor/', include('DjangoUeditor.urls')),
     url(r'^xadmin/', xadmin.site.urls),
-]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^media/(?P<path>.*)', serve, {"document_root": MEDIA_ROOT}),
+]
+from django.conf import settings
+if settings.DEBUG:
+    from django.conf.urls.static import static
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

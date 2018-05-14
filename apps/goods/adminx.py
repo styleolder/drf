@@ -70,7 +70,6 @@ class GoodsAdmin(object):
         "is_hot"
     ]
 
-
 class GoodsImageAdmin(object):
     fields = ['goods', 'image', 'add_time', 'index']
     search_fields = ['goods']
