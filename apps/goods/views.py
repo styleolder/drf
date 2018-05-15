@@ -1,4 +1,4 @@
-from django.shortcuts import render
+# -*- coding: utf-8 -*-
 from goods.models import Goods
 from django.views.generic.base import View
 
@@ -7,12 +7,8 @@ import json
 
 class GoodsList(View):
     def get(self,request):
-        json_list = []
         goods = Goods.objects.all()
-        for good in goods:
-            json_dist = {}
-            json_dist['name'] = good.name
-            json_dist['good_sn'] = good.good_sn
-            json_list.append(json_dist)
         from django.http import HttpResponse
-        return HttpResponse(json.dumps(json_list),content_type="application/json")
+        from django.core import serializers
+        json_data = serializers.serialize("json", goods)
+        return HttpResponse(json_data,content_type="application/json")
