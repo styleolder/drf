@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """drf URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -18,11 +19,11 @@ from drf.settings import MEDIA_ROOT
 import xadmin
 from django.conf.urls.static import serve
 
-
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
     url(r'^ueditor/', include('DjangoUeditor.urls')),
     url(r'^xadmin/', xadmin.site.urls),
     url(r'^media/(?P<path>.*)', serve, {"document_root": MEDIA_ROOT}),
-    url(r'goods/',include('goods.urls'))
+    url(r'^goods/',include('goods.urls')),
+    url(r'^api/', include('api.urls'), name='api'),
 ]
