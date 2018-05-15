@@ -25,7 +25,7 @@ class UserProfile(AbstractUser):
         swappable = 'AUTH_USER_MODEL'
 
     def __str__(self):
-        return self.name
+        return self.username
 
 
 @python_2_unicode_compatible

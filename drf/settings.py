@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'user_opration.apps.UserOprationConfig',
     'crispy_forms',
     'rest_framework',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -138,10 +139,8 @@ MEDIA_URL = '/media/'
 #
 AUTH_USER_MODEL = 'users.UserProfile'
 
-# REST_FRAMEWORK = {
-#     # Use Django's standard `django.contrib.auth` permissions,
-#     # or allow read-only access for unauthenticated users.
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-#     ]
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 1,
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+}
