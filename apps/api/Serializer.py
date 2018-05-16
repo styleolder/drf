@@ -14,13 +14,24 @@ from goods.models import Goods, GoodCategory
 #         Create and return a new `Snippet` instance, given the validated data.
 #         """
 #         return Goods.objects.create(**validated_data)
-
-
 class GoodCategorySerializer(serializers.ModelSerializer):
      class Meta:
         model = GoodCategory
         fields = "__all__"
 
+
+class GoodCategorySerializer2(serializers.ModelSerializer):
+     sub_name = GoodCategorySerializer(many=True)
+     class Meta:
+        model = GoodCategory
+        fields = "__all__"
+
+
+class GoodCategorySerializer3(serializers.ModelSerializer):
+     sub_name = GoodCategorySerializer(many=True)
+     class Meta:
+        model = GoodCategory
+        fields = "__all__"
 
 class GoodsSerializer2(serializers.ModelSerializer):
      category = GoodCategorySerializer()

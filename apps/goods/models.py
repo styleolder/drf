@@ -60,7 +60,7 @@ class Goods(models.Model):
     name = models.CharField(default="", max_length=50, verbose_name="商品名称")
     good_sn = models.CharField(default="", max_length=100, verbose_name="商品编码")
     desc = models.TextField(default="", verbose_name="商品描述")
-    brand = models.ForeignKey(GoodsCategoryBrand)
+    brand = models.ForeignKey(GoodsCategoryBrand, default=None, blank=True, null=True)
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
     click_num = models.IntegerField(default=0, verbose_name="商品点击数")
     sold_num = models.IntegerField(default=0, verbose_name="商品售卖数")

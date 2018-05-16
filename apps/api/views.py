@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from goods.models import Goods
+from goods.models import Goods,GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2
+from .Serializer import GoodsSerializer2,GoodCategorySerializer3
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -38,11 +38,17 @@ from rest_framework import filters
 class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodsSerializer2
     queryset = Goods.objects.all()
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter,filters.OrderingFilter)
     # filter_fields = ('name', 'good_sn')
     filter_class = ProFilter
     search_fields = ("name",)
+    order_fields = ("good_sn",)
 
+class GoodCategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = GoodCategorySerializer3
+    queryset = GoodCategory.objects.all()
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    order_fields = ("code",)
     # def get_queryset(self):
     #     queryset = Goods.objects.all()
     #     market_price = self.request.query_params.get("market_price", 0)
