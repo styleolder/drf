@@ -8,7 +8,7 @@ from rest_framework import mixins, generics
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
-
+from rest_framework import filters
 
 # class GoodsListView(APIView):
 #     """
@@ -38,9 +38,10 @@ from .filters import ProFilter
 class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodsSerializer2
     queryset = Goods.objects.all()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # filter_fields = ('name', 'good_sn')
     filter_class = ProFilter
+    search_fields = ("name",)
 
     # def get_queryset(self):
     #     queryset = Goods.objects.all()
