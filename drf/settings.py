@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'django_filters',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'rest_framework_jwt'
 ]
 
 MIDDLEWARE = [
@@ -144,11 +145,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     #配置DRF用户权限
     # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    #添加用户权限，只有登录才能获取
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'PAGE_SIZE': 1,
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         #添加局部token
         # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),

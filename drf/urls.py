@@ -19,6 +19,7 @@ from drf.settings import MEDIA_ROOT
 import xadmin
 from django.conf.urls.static import serve
 from rest_framework.authtoken import views
+from rest_framework_jwt.views import obtain_jwt_token
 
 
 urlpatterns = [
@@ -28,5 +29,8 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)', serve, {"document_root": MEDIA_ROOT}),
     url(r'^goods/',include('goods.urls')),
     url(r'^api/', include('api.urls'), name='api'),
-    url(r'^api-token-auth/', views.obtain_auth_token)
+    #drf自带的token认证
+    # url(r'^api-token-auth/', views.obtain_auth_token)
+    #jwt的token认证
+    url(r'^api-token-auth/', obtain_jwt_token),
 ]
