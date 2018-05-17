@@ -18,6 +18,8 @@ from django.conf.urls import url, include
 from drf.settings import MEDIA_ROOT
 import xadmin
 from django.conf.urls.static import serve
+from rest_framework.authtoken import views
+
 
 urlpatterns = [
     url(r'^admin/', xadmin.site.urls),
@@ -26,4 +28,5 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)', serve, {"document_root": MEDIA_ROOT}),
     url(r'^goods/',include('goods.urls')),
     url(r'^api/', include('api.urls'), name='api'),
+    url(r'^api-token-auth/', views.obtain_auth_token)
 ]

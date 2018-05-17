@@ -9,6 +9,9 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
 from rest_framework import filters
+#添加token认证
+from rest_framework.authentication import TokenAuthentication
+from users.models import UserProfile
 
 # class GoodsListView(APIView):
 #     """
@@ -44,11 +47,19 @@ class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     search_fields = ("name",)
     order_fields = ("good_sn",)
 
-class GoodCategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodCategorySerializer3
     queryset = GoodCategory.objects.all()
+    # queryset = GoodCategory.objects.filter(category_type="1")
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     order_fields = ("code",)
+    authentication_classes = (TokenAuthentication,)
+    # from rest_framework.authtoken.models import Token
+    # from users.models import UserProfile
+    # for user in UserProfile.objects.all():
+    #     Token.objects.create(user=user)
+    #     print user.username, Token.key
+    #     print "======================="
     # def get_queryset(self):
     #     queryset = Goods.objects.all()
     #     market_price = self.request.query_params.get("market_price", 0)
