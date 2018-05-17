@@ -163,3 +163,10 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'users.utils.Custom.CustomBackend',
 )
+#设置JWT token过期时间
+import datetime
+JWT_AUTH  = {
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    #默认是JWT
+    'JWT_AUTH_HEADER_PREFIX': 'JWT'
+}
