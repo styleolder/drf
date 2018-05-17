@@ -159,3 +159,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
+#添加自定义认证的字段
+AUTHENTICATION_BACKENDS = (
+    'users.utils.Custom.CustomBackend',
+)
