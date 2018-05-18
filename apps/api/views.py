@@ -2,15 +2,15 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer,UserSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
 from rest_framework import filters
-#添加token认证
-from rest_framework.authentication import TokenAuthentication,BasicAuthentication,SessionAuthentication
+# 添加token认证
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
 from random import choice
 # class GoodsListView(APIView):
@@ -41,11 +41,12 @@ from random import choice
 class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodsSerializer2
     queryset = Goods.objects.all()
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter,filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     # filter_fields = ('name', 'good_sn')
     filter_class = ProFilter
     search_fields = ("name",)
     order_fields = ("good_sn",)
+
 
 class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodCategorySerializer3
@@ -72,9 +73,9 @@ class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets
     serializer_class = VerifyCodeSerializer
     queryset = VerifyCode.objects.all()
     # queryset = GoodCategory.objects.filter(category_type="1")
-    filter_backends = (DjangoFilterBackend,  filters.SearchFilter,filters.OrderingFilter)
-    order_fields = ("-add_time",)
-    search_fields = ("mobile",)
+    # filter_backends = (DjangoFilterBackend,  filters.SearchFilter,filters.OrderingFilter)
+    # order_fields = ("-add_time",)
+    # search_fields = ("mobile",)
     authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
 
     #自定义create方法
@@ -89,6 +90,20 @@ class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets
             code.append(choice(code_list))
         code = "".join(code)
         print code
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        verifycode = VerifyCode(code=code, mobile=mobile)
+        verifycode.save()
+        return Response(
+            {
+                            "mobile": mobile,
+                            "code": code
+            }, status=status.HTTP_201_CREATED)
+
+
+class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = UserSerializer
+    queryset = UserProfile.objects.all()
+    # queryset = GoodCategory.objects.filter(category_type="1")
+    # filter_backends = (DjangoFilterBackend,  filters.SearchFilter,filters.OrderingFilter)
+    # order_fields = ("-add_time",)
+    # search_fields = ("mobile",)
+    # authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)

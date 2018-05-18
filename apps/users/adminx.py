@@ -9,9 +9,9 @@ class UserProfileAdmin(object):
 
 
 class VerifyCodeAdmin(object):
-    fields = ['code', 'add_time', 'mobile']
+    fields = ['code', 'add_time', 'mobile', 'code_type']
     search_fields = ['mobile']
-    list_filter = ['code', 'add_time', 'mobile']
+    list_filter = ['code', 'add_time', 'mobile', 'code_type']
 
 
 xadmin.site.register(VerifyCode, VerifyCodeAdmin)
