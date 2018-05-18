@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from goods.models import Goods,GoodCategory
+from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2,GoodCategorySerializer3
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -10,9 +10,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
 from rest_framework import filters
 #添加token认证
-from rest_framework.authentication import TokenAuthentication
-from users.models import UserProfile
-
+from rest_framework.authentication import TokenAuthentication,BasicAuthentication,SessionAuthentication
+from users.models import UserProfile, VerifyCode
+from random import choice
 # class GoodsListView(APIView):
 #     """
 #     List all snippets, or create a new snippet.
@@ -66,3 +66,29 @@ class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     #     if market_price:
     #         queryset = queryset.filter(market_price__gt=market_price)
     #     return queryset
+
+
+class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = VerifyCodeSerializer
+    queryset = VerifyCode.objects.all()
+    # queryset = GoodCategory.objects.filter(category_type="1")
+    filter_backends = (DjangoFilterBackend,  filters.SearchFilter,filters.OrderingFilter)
+    order_fields = ("-add_time",)
+    search_fields = ("mobile",)
+    authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
+
+    #自定义create方法
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mobile = serializer.validated_data["mobile"]
+        print mobile
+        code_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+        code = []
+        for i in range(6):
+            code.append(choice(code_list))
+        code = "".join(code)
+        print code
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
