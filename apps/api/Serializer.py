@@ -48,6 +48,7 @@ class GoodsSerializer2(serializers.ModelSerializer):
         fields = "__all__"
 
 
+#自定义用户输入验证
 class VerifyCodeSerializer(serializers.ModelSerializer):
     mobile = serializers.CharField(max_length=11)
     add_time = serializers.DateTimeField(read_only=True)
