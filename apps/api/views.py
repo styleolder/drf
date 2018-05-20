@@ -2,7 +2,7 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer,UserSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, UserSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -10,11 +10,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
 from rest_framework import filters
 # 添加token认证
+from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
 from random import choice
 # class GoodsListView(APIView):
-#     """
+# """
 #     List all snippets, or create a new snippet.
 #     """
 #     def get(self, request, format=None):
@@ -54,6 +55,10 @@ class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     # queryset = GoodCategory.objects.filter(category_type="1")
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     order_fields = ("code",)
+    from rest_framework.permissions import IsAuthenticated
+    permission_classes = (
+        IsAuthenticated,
+    )
     authentication_classes = (TokenAuthentication,)
     # from rest_framework.authtoken.models import Token
     # from users.models import UserProfile
@@ -94,16 +99,31 @@ class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets
         verifycode.save()
         return Response(
             {
-                            "mobile": mobile,
-                            "code": code
+                "mobile": mobile,
+                "code": code
             }, status=status.HTTP_201_CREATED)
 
 
-class UserViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class UserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = UserSerializer
     queryset = UserProfile.objects.all()
+    # authentication_classes = (TokenAuthentication,)
     # queryset = GoodCategory.objects.filter(category_type="1")
     # filter_backends = (DjangoFilterBackend,  filters.SearchFilter,filters.OrderingFilter)
     # order_fields = ("-add_time",)
     # search_fields = ("mobile",)
     # authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
+    # 自定义用户返回信息，返回数据里添加token
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.perform_create(serializer)
+        payload = jwt_payload_handler(user)
+        serializer.data["token"] = jwt_encode_handler(payload)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        return serializer.save()

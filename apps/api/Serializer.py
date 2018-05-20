@@ -16,8 +16,8 @@ from datetime import datetime, timedelta
 # def create(self, validated_data):
 # """
 # Create and return a new `Snippet` instance, given the validated data.
-#         """
-#         return Goods.objects.create(**validated_data)
+# """
+# return Goods.objects.create(**validated_data)
 class GoodCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodCategory
@@ -48,7 +48,7 @@ class GoodsSerializer2(serializers.ModelSerializer):
         fields = "__all__"
 
 
-#自定义用户输入验证
+# 自定义用户输入验证
 class VerifyCodeSerializer(serializers.ModelSerializer):
     mobile = serializers.CharField(max_length=11)
     add_time = serializers.DateTimeField(read_only=True)
@@ -76,14 +76,34 @@ class VerifyCodeSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(allow_blank=False, required=True,
+    username = serializers.CharField(allow_blank=False, required=True, label="用户名",
                                      validators=[
                                          UniqueValidator(queryset=UserProfile.objects.all(), message="用户已经存在")])
-    code = serializers.CharField(max_length=6, required=True, min_length=6, help_text="验证码", write_only=True)
+    code = serializers.CharField(max_length=6, required=True, min_length=6, help_text="验证码", write_only=True,
+                                 label="手机短信验证码")
+    password = serializers.CharField(
+        style={
+            'input_type': 'password'
+        },
+        min_length=6,
+        max_length=12,
+        label="密码",
+        write_only=True,
+    )
 
+    # 保存model的时候进行值的更新
+    def create(self, validated_data):
+        user = super(UserSerializer, self).create(validated_data=validated_data)
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+    #取值验证
     def validate_code(self, code):
-        verify_records = VerifyCode.objects.filter(mobile=self.initial_data["username"]
-                        ).order_by("-add_time")
+        reg_num = "[0-9]{6}"
+        if not re.match(reg_num, code):
+            raise serializers.ValidationError("验证码格式错误")
+        verify_records = VerifyCode.objects.filter(mobile=self.initial_data["username"]).order_by("-add_time")
         if verify_records:
             last_record = verify_records[0]
             now = datetime.now() - timedelta(hours=0, minutes=5, seconds=0)
@@ -94,11 +114,13 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError("验证码错误")
 
+    #整体的值验证，所有的值已dict的形式存储在attrs中
     def validate(self, attrs):
         attrs["mobile"] = attrs["username"]
         del attrs["code"]
         return attrs
 
+    #设置关联的model与需要操作的字段
     class Meta:
         model = UserProfile
-        fields = ('username', 'mobile', 'code')
+        fields = ('username', 'mobile', 'code', 'password')
