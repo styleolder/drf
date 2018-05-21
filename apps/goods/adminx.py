@@ -69,6 +69,13 @@ class GoodsAdmin(object):
         "is_new",
         "is_hot"
     ]
+    list_display = [
+        "name",
+        "good_sn",
+        "desc",
+        "brand"
+    ]
+
 
 class GoodsImageAdmin(object):
     fields = ['goods', 'image', 'add_time', 'index']

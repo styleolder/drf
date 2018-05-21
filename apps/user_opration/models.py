@@ -16,12 +16,14 @@ class UserFav(models.Model):
         用户收藏
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    goods = models.ForeignKey(Goods)
+    goods = models.ForeignKey(Goods, related_name="goods")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
     class Meta:
         verbose_name = "用户收藏"
         verbose_name_plural = verbose_name
+        #增加联合验证，保证一个用户收藏同种商品只有一次
+        # unique_together = ("user", "goods")
 
     def __str__(self):
         return self.user.name

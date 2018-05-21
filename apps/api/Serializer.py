@@ -2,8 +2,10 @@
 __author__ = 'style'
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from goods.models import Goods, GoodCategory
+from goods.models import Goods, GoodCategory, GoodsImage
 from users.models import VerifyCode, UserProfile
+from user_opration.models import UserFav
+from rest_framework.validators import UniqueTogetherValidator
 
 import re
 from datetime import datetime, timedelta
@@ -34,21 +36,45 @@ class GoodCategorySerializer2(serializers.ModelSerializer):
 
 class GoodCategorySerializer3(serializers.ModelSerializer):
     sub_name = GoodCategorySerializer(many=True)
-
     class Meta:
         model = GoodCategory
         fields = "__all__"
 
 
+class GoodsImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsImage
+        fields = ("image", "index", "add_time")
+
+
 class GoodsSerializer2(serializers.ModelSerializer):
     category = GoodCategorySerializer()
+    goodsimage = GoodsImageSerializer(many=True)
 
     class Meta:
         model = Goods
         fields = "__all__"
 
 
+class UserFavSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = UserFav
+        fields = ("user", "goods", "id")
+        #增加联合验证，保证一个用户收藏同种商品只有一次
+        validators = [
+            UniqueTogetherValidator(
+                queryset=UserFav.objects.all(),
+                fields=('user', 'goods'),
+                message="已经收藏"
+            )
+        ]
 # 自定义用户输入验证
+
+
 class VerifyCodeSerializer(serializers.ModelSerializer):
     mobile = serializers.CharField(max_length=11)
     add_time = serializers.DateTimeField(read_only=True)

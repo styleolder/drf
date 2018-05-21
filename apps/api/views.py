@@ -2,7 +2,7 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, UserSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, UserSerializer, UserFavSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -13,6 +13,7 @@ from rest_framework import filters
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
+from user_opration.models import UserFav
 from random import choice
 # class GoodsListView(APIView):
 # """
@@ -39,7 +40,7 @@ from random import choice
 #         return self.list(request, *args, **kwargs)
 
 
-class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = GoodsSerializer2
     queryset = Goods.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
@@ -47,6 +48,11 @@ class GoodsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_class = ProFilter
     search_fields = ("name",)
     order_fields = ("good_sn",)
+
+
+class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = UserFavSerializer
+    queryset = UserFav.objects.all()
 
 
 class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

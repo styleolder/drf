@@ -81,7 +81,7 @@ class Goods(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.good_sn
+        return self.name
 
 
 @python_2_unicode_compatible
@@ -89,8 +89,8 @@ class GoodsImage(models.Model):
     """
         商品轮播图
     """
-    goods = models.ForeignKey(Goods)
-    image = models.ImageField(upload_to="", verbose_name="轮播图")
+    goods = models.ForeignKey(Goods, related_name="goodsimage")
+    image = models.ImageField(upload_to="", verbose_name="轮播图", blank=True)
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
     index = models.IntegerField(default=100, verbose_name="轮播图权重")
 
@@ -108,7 +108,7 @@ class Banner(models.Model):
         首页轮播图
     """
     goods = models.ForeignKey(Goods)
-    image = models.ImageField(upload_to="", verbose_name="轮播图")
+    image = models.ImageField(upload_to="", verbose_name="轮播图", blank=True)
     index = models.IntegerField(default=100, verbose_name="轮播图权重")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
