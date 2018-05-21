@@ -164,6 +164,15 @@ class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, vie
     """
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication, SessionAuthentication,)
+
+    #动态加载Serializer
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return UserProfileSerializer
+        elif self.action == "create":
+            return UserSerializer
+        return UserProfileSerializer
 
     def get_permissions(self):
         if self.action == "retrieve":
@@ -172,3 +181,6 @@ class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, vie
             return []
         return []
 
+    #默认ID返回，只会返回当前登录用户的信息
+    def get_object(self):
+        return self.request.user
