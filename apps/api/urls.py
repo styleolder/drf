@@ -2,7 +2,7 @@
 from django.conf.urls import url, include
 from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
-from views import GoodsViewSet, GoodCategoryViewSet, VerifyCodeViewSet, UserViewSet, UserFavViewSet
+from views import GoodsViewSet, GoodCategoryViewSet, VerifyCodeViewSet, UserViewSet, UserFavViewSet,UserProfileViewSet
 
 router = DefaultRouter()
 router.register(r'goods', GoodsViewSet)
@@ -10,7 +10,7 @@ router.register(r'goodscategort', GoodCategoryViewSet)
 router.register(r'verifycode', VerifyCodeViewSet)
 router.register(r'UserViewSet', UserViewSet)
 router.register(r'UserFav', UserFavViewSet)
-
+router.register(r'UserProfileViewSet', UserProfileViewSet)
 
 # Routers provide an easy way of automatically determining the URL conf.
 urlpatterns = [

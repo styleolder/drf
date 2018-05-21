@@ -2,13 +2,17 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, UserSerializer, UserFavSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer,\
+    UserSerializer, UserFavSerializer, UserProfileSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProFilter
 from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
+from permissions import IsOwnerOrReadOnly
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 # 添加token认证
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
@@ -41,6 +45,9 @@ from random import choice
 
 
 class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+        获取商品详细信息
+    """
     serializer_class = GoodsSerializer2
     queryset = Goods.objects.all()
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
@@ -51,8 +58,21 @@ class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
 
 
 class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+        用户收藏信息接口
+    """
     serializer_class = UserFavSerializer
     queryset = UserFav.objects.all()
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    permission_classes = (
+        IsAuthenticated,
+        IsOwnerOrReadOnly,
+    )
+    #设置单条检索的索引
+    lookup_field = "goods_id"
+
+    def get_queryset(self):
+        return UserFav.objects.filter(user=self.request.user)
 
 
 class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -61,11 +81,11 @@ class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     # queryset = GoodCategory.objects.filter(category_type="1")
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     order_fields = ("code",)
-    from rest_framework.permissions import IsAuthenticated
+
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (
         IsAuthenticated,
     )
-    authentication_classes = (TokenAuthentication,)
     # from rest_framework.authtoken.models import Token
     # from users.models import UserProfile
     # for user in UserProfile.objects.all():
@@ -131,5 +151,24 @@ class UserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def get_object(self):
+        return self.request.user
+
     def perform_create(self, serializer):
         return serializer.save()
+
+
+class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+        用户收藏信息接口
+    """
+    serializer_class = UserProfileSerializer
+    queryset = UserProfile.objects.all()
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            return [IsAuthenticated()]
+        elif self.action == "create":
+            return []
+        return []
+

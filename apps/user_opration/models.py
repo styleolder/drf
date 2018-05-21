@@ -16,7 +16,7 @@ class UserFav(models.Model):
         用户收藏
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    goods = models.ForeignKey(Goods, related_name="goods")
+    goods = models.ForeignKey(Goods, related_name="goods", help_text="商品ID")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
     class Meta:
@@ -26,7 +26,7 @@ class UserFav(models.Model):
         # unique_together = ("user", "goods")
 
     def __str__(self):
-        return self.user.name
+        return self.user.username
 
 
 @python_2_unicode_compatible
