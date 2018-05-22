@@ -189,16 +189,6 @@ class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, vie
             return UserSerializer
         return UserProfileSerializer
 
-    authentication_classes = (TokenAuthentication, SessionAuthentication,)
-
-    #动态加载Serializer
-    def get_serializer_class(self):
-        if self.action == "retrieve":
-            return UserProfileSerializer
-        elif self.action == "create":
-            return UserSerializer
-        return UserProfileSerializer
-
     def get_permissions(self):
         if self.action == "retrieve":
             return [IsAuthenticated()]
