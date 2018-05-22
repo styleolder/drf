@@ -72,6 +72,15 @@ class UserFavSerializer(serializers.ModelSerializer):
                 message="已经收藏"
             )
         ]
+
+
+class UserFavReSerializer(serializers.ModelSerializer):
+    goods = GoodsSerializer2()
+
+    class Meta:
+        model = UserFav
+        fields = ("goods", "id")
+        #增加联合验证，保证一个用户收藏同种商品只有一次
 # 自定义用户输入验证
 
 

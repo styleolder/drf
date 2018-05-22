@@ -3,7 +3,7 @@ from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer,\
-    UserSerializer, UserFavSerializer, UserProfileSerializer
+    UserSerializer, UserFavSerializer, UserProfileSerializer,UserFavReSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -70,12 +70,21 @@ class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Retr
     )
     #设置单条检索的索引
     lookup_field = "goods_id"
+    def get_serializer_class(self):
+        if self.action == "list":
+            return UserFavReSerializer
+        elif self.action == "create":
+            return UserFavSerializer
+        return UserFavSerializer
 
     def get_queryset(self):
         return UserFav.objects.filter(user=self.request.user)
 
 
 class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+        商品分类
+    """
     serializer_class = GoodCategorySerializer3
     queryset = GoodCategory.objects.all()
     # queryset = GoodCategory.objects.filter(category_type="1")
@@ -101,6 +110,9 @@ class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
 
 
 class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+        手机验证码
+    """
     serializer_class = VerifyCodeSerializer
     queryset = VerifyCode.objects.all()
     # queryset = GoodCategory.objects.filter(category_type="1")
@@ -131,6 +143,9 @@ class VerifyCodeViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets
 
 
 class UserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+        用户短信注册
+    """
     serializer_class = UserSerializer
     queryset = UserProfile.objects.all()
     # authentication_classes = (TokenAuthentication,)
@@ -160,10 +175,20 @@ class UserViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
-        用户收藏信息接口
+        用户个人信息
     """
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication, SessionAuthentication,)
+
+    #动态加载Serializer
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return UserProfileSerializer
+        elif self.action == "create":
+            return UserSerializer
+        return UserProfileSerializer
+
     authentication_classes = (TokenAuthentication, SessionAuthentication,)
 
     #动态加载Serializer
