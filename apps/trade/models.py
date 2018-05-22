@@ -9,15 +9,14 @@ from goods.models import Goods
 from drf import settings
 
 
-
 @python_2_unicode_compatible
 class ShoppingTrade(models.Model):
     """
         购物车
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="用户")
-    goods = models.ForeignKey(Goods)
-    goods_num = models.IntegerField(default=0)
+    goods = models.ForeignKey(Goods, verbose_name="商品")
+    goods_num = models.IntegerField(default=0, verbose_name="购买数量")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
     class Meta:
@@ -25,8 +24,8 @@ class ShoppingTrade(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "%s(%d)".format(self.goods.name, self.goods_num)
-
+        return self.goods.name+"("+str(self.goods_num)+")"
+        #return "%s(%d)".format(self.goods.name, self.goods_num)
 
 @python_2_unicode_compatible
 class OrderInfo(models.Model):
@@ -73,3 +72,4 @@ class OrderGoods(models.Model):
 
     def __str__(self):
         return self.good_sn
+

@@ -2,8 +2,8 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer,\
-    UserSerializer, UserFavSerializer, UserProfileSerializer,UserFavReSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, \
+    UserSerializer, UserFavSerializer, UserProfileSerializer, UserFavReSerializer, ShoppingTradeSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -18,12 +18,13 @@ from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handl
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
 from user_opration.models import UserFav
+from trade.models import ShoppingTrade
 from random import choice
 # class GoodsListView(APIView):
 # """
-#     List all snippets, or create a new snippet.
-#     """
-#     def get(self, request, format=None):
+# List all snippets, or create a new snippet.
+# """
+# def get(self, request, format=None):
 #         goods = Goods.objects.all()
 #         serializer = GoodsSerializer2(goods, many=True)
 #         return Response(serializer.data)
@@ -57,7 +58,8 @@ class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
     order_fields = ("good_sn",)
 
 
-class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+                     viewsets.GenericViewSet):
     """
         用户收藏信息接口
     """
@@ -70,6 +72,7 @@ class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Retr
     )
     #设置单条检索的索引
     lookup_field = "goods_id"
+
     def get_serializer_class(self):
         if self.action == "list":
             return UserFavReSerializer
@@ -199,3 +202,22 @@ class UserProfileViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, vie
     #默认ID返回，只会返回当前登录用户的信息
     def get_object(self):
         return self.request.user
+
+
+class ShoppingTradeViewSet(viewsets.ModelViewSet):
+    """
+        购物车
+    """
+    serializer_class = ShoppingTradeSerializer
+    authentication_classes = (TokenAuthentication, SessionAuthentication)
+    permission_classes = (
+        IsAuthenticated,
+        IsOwnerOrReadOnly
+    )
+    lookup_field = "goods_id"
+    #首先会验证queryset，然后才会重写
+    queryset = ShoppingTrade.objects.all()
+
+    #重写queryset
+    def get_queryset(self):
+        return ShoppingTrade.objects.filter(user=self.request.user)

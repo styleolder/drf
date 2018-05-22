@@ -5,6 +5,7 @@ from rest_framework.validators import UniqueValidator
 from goods.models import Goods, GoodCategory, GoodsImage
 from users.models import VerifyCode, UserProfile
 from user_opration.models import UserFav
+from trade.models import ShoppingTrade
 from rest_framework.validators import UniqueTogetherValidator
 
 import re
@@ -164,4 +165,40 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ("username","mobile","birthday","gender","email")
+        fields = ("username", "mobile", "birthday", "gender", "email")
+
+
+class ShoppingTradeSerializer(serializers.Serializer):
+    """
+        自定义Serializer
+    """
+    #自动填充请求数据的用户，会被数据保存到self.context['request']中
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    goods_num = serializers.IntegerField(min_value=1, required=True, error_messages={
+        "min_value": "商品数据大于1",
+        "required": "此商品已经存在"
+    })
+    goods = serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all(), required=True)
+
+    #自定serializer的create方法
+    def create(self, validated_data):
+        #获取当前用户从serializers.HiddenField(
+        #serializers.CurrentUserDefault()
+        #)中得到
+        user = self.context['request'].user
+        #validated_data 是上面定义的model form的dict
+        goods_num = validated_data['goods_num']
+        #goods由于是外键的原因，其实goods是一个对象
+        goods = validated_data['goods']
+        #保存购物车有2中可能，1.没有此种商品，自动创建对象 2.有此种商品，
+        existed = ShoppingTrade.objects.filter(user=user, goods=goods)
+        if existed:
+            existed = existed[0]
+            existed.goods_num += goods_num
+            existed.save()
+        else:
+            existed = ShoppingTrade.objects.create(**validated_data)
+
+        return existed

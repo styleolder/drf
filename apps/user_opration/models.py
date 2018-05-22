@@ -7,7 +7,7 @@ from goods.models import Goods
 from django.contrib.auth import get_user_model
 # Create your models here.
 from drf import settings
-# User = get_user_model()
+#User = get_user_model()
 
 
 @python_2_unicode_compatible
