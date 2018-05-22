@@ -2,8 +2,12 @@
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .Serializer import GoodsSerializer2, GoodCategorySerializer3, VerifyCodeSerializer, \
-    UserSerializer, UserFavSerializer, UserProfileSerializer, UserFavReSerializer, ShoppingTradeSerializer
+from .Serializer import GoodsSerializer2, GoodCategorySerializer3, \
+    VerifyCodeSerializer, UserSerializer, \
+    UserFavSerializer, UserProfileSerializer, \
+    UserFavReSerializer, \
+    ShoppingTradeSerializer,\
+    ShoppingTradeReSerializer, OrderInfoSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -18,7 +22,7 @@ from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handl
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
 from user_opration.models import UserFav
-from trade.models import ShoppingTrade
+from trade.models import ShoppingTrade, OrderInfo
 from random import choice
 # class GoodsListView(APIView):
 # """
@@ -208,7 +212,6 @@ class ShoppingTradeViewSet(viewsets.ModelViewSet):
     """
         购物车
     """
-    serializer_class = ShoppingTradeSerializer
     authentication_classes = (TokenAuthentication, SessionAuthentication)
     permission_classes = (
         IsAuthenticated,
@@ -218,6 +221,36 @@ class ShoppingTradeViewSet(viewsets.ModelViewSet):
     #首先会验证queryset，然后才会重写
     queryset = ShoppingTrade.objects.all()
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return ShoppingTradeReSerializer
+        return ShoppingTradeSerializer
+
     #重写queryset
     def get_queryset(self):
         return ShoppingTrade.objects.filter(user=self.request.user)
+
+
+class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
+    """
+        购物车
+    """
+    serializer_class = OrderInfoSerializer
+    authentication_classes = (TokenAuthentication, SessionAuthentication)
+    permission_classes = (
+        IsAuthenticated,
+        IsOwnerOrReadOnly
+    )
+    #首先会验证queryset，然后才会重写
+    queryset = OrderInfo.objects.all()
+
+    #重写queryset
+    def get_queryset(self):
+        return OrderInfo.objects.filter(user=self.request.user)
+
+    def generate_order_sn(self):
+        #生成订单号
+        pass
+
+    def perform_create(self, serializer):
+        return serializer.save()

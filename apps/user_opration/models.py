@@ -43,4 +43,4 @@ class UserAddress(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "%s(%s)".format(self.user, self.address)
+        return self.user

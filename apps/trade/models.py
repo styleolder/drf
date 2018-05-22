@@ -24,7 +24,7 @@ class ShoppingTrade(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.goods.name+"("+str(self.goods_num)+")"
+        return self.goods.name
         #return "%s(%d)".format(self.goods.name, self.goods_num)
 
 @python_2_unicode_compatible
@@ -38,15 +38,15 @@ class OrderInfo(models.Model):
         ("wait", "等待支付")
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    order_sn = models.CharField(max_length=100, verbose_name="订单编号")
-    trade_no = models.CharField(max_length=100, unique=True, null=True, blank=True,verbose_name="第三方订单编号")
+    order_sn = models.CharField(max_length=100, verbose_name="订单编号", null=True, blank=True)
+    trade_no = models.CharField(max_length=100, unique=True, null=True, blank=True, verbose_name="第三方订单编号")
     pay_status = models.CharField(max_length=10, choices=ORDER_STATUS, verbose_name="订单状态")
     pay_time = models.DateTimeField(verbose_name="支付时间")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
     address = models.CharField(max_length=200, verbose_name="地址")
     signer_name = models.CharField(max_length=50, verbose_name="收件人姓名")
     signer_mobile = models.CharField(max_length=11, verbose_name="收件人电话")
-    bbs = models.CharField(max_length=50, verbose_name="订单留言")
+    bbs = models.CharField(max_length=50, verbose_name="订单留言", null=True, blank=True)
 
     class Meta:
         verbose_name = "订单信息"
@@ -67,7 +67,7 @@ class OrderGoods(models.Model):
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
 
     class Meta:
-        verbose_name = "订单详细信息"
+        verbose_name = "订单详情"
         verbose_name_plural = verbose_name
 
     def __str__(self):

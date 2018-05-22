@@ -5,6 +5,11 @@ from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 
 
 class ShoppingTradeAdmin(object):
+    list_display = [
+        "goods",
+        "goods_num",
+        "user",
+    ]
     fields = ['user', 'goods', 'goods_num', 'add_time']
     search_fields = ['goods', 'goods_num', 'add_time']
     list_filter = ['user', 'goods', 'goods_num', 'add_time']
