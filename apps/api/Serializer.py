@@ -221,6 +221,15 @@ class ShoppingTradeReSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class OrderInfoReSerializer(serializers.ModelSerializer):
+    #todo
+    goods = ShoppingTradeReSerializer(many=False)
+
+    class Meta:
+        model = OrderInfo
+        fields = "__all__"
+
+
 class OrderInfoSerializer(serializers.ModelSerializer):
     #自动填充user
     user = serializers.HiddenField(

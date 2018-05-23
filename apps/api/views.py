@@ -9,7 +9,7 @@ from .Serializer import GoodsSerializer2, GoodCategorySerializer3, \
     UserFavReSerializer, \
     ShoppingTradeSerializer, \
     ShoppingTradeReSerializer, OrderInfoSerializer,\
-    UserAddressSerializer
+    UserAddressSerializer, OrderInfoReSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -237,7 +237,6 @@ class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
     """
         订单信息
     """
-    serializer_class = OrderInfoSerializer
     authentication_classes = (TokenAuthentication, SessionAuthentication)
     permission_classes = (
         IsAuthenticated,
@@ -245,8 +244,14 @@ class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
     )
     #首先会验证queryset，然后才会重写
     queryset = OrderInfo.objects.all()
+    #动态获取serializer
 
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return OrderInfoReSerializer
+        return OrderInfoSerializer
     #重写queryset
+
     def get_queryset(self):
         return OrderInfo.objects.filter(user=self.request.user)
     #可以从ViewSet中补充字段，但是一般都是在Serializer中自动填充的
@@ -303,6 +308,7 @@ class UserAddressViewSet(viewsets.ModelViewSet):
         IsAuthenticated,
         IsOwnerOrReadOnly
     )
+
     #首先会验证queryset，然后才会重写
     queryset = UserAddress.objects.all()
 
