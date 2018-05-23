@@ -230,7 +230,9 @@ class OrderGoodsSerializer(serializers.ModelSerializer):
 
 
 class OrderInfoReSerializer(serializers.ModelSerializer):
-    #todo
+    """
+        订单详细信息
+    """
     goods = OrderGoodsSerializer(many=True)
 
     class Meta:
