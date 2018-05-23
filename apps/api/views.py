@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from goods.models import Goods, GoodCategory
 from rest_framework.views import APIView
+from rest_framework import serializers
 from rest_framework.response import Response
 from .Serializer import GoodsSerializer2, GoodCategorySerializer3, \
     VerifyCodeSerializer, UserSerializer, \
     UserFavSerializer, UserProfileSerializer, \
     UserFavReSerializer, \
-    ShoppingTradeSerializer,\
+    ShoppingTradeSerializer, \
     ShoppingTradeReSerializer, OrderInfoSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
@@ -22,14 +23,14 @@ from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handl
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
 from user_opration.models import UserFav
-from trade.models import ShoppingTrade, OrderInfo
+from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from random import choice
 # class GoodsListView(APIView):
 # """
 # List all snippets, or create a new snippet.
 # """
 # def get(self, request, format=None):
-#         goods = Goods.objects.all()
+# goods = Goods.objects.all()
 #         serializer = GoodsSerializer2(goods, many=True)
 #         return Response(serializer.data)
 #
@@ -233,7 +234,7 @@ class ShoppingTradeViewSet(viewsets.ModelViewSet):
 
 class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
     """
-        购物车
+        订单信息
     """
     serializer_class = OrderInfoSerializer
     authentication_classes = (TokenAuthentication, SessionAuthentication)
@@ -247,10 +248,46 @@ class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
     #重写queryset
     def get_queryset(self):
         return OrderInfo.objects.filter(user=self.request.user)
-
-    def generate_order_sn(self):
-        #生成订单号
-        pass
+    #可以从ViewSet中补充字段，但是一般都是在Serializer中自动填充的
+    # def generate_order_sn(self):
+    #     #以下为自己实现的时间戳，只精确到秒
+    #     # from random import choice
+    #     # import time
+    #     # base_str = "zxcvbnmlkjhgfdsaqwertyuiopQWERTYUIOPASDFGHJKLZXCVBNM1234567890"
+    #     # result = [int(time.time()), self.request.user.id]
+    #     # for i in range(num):
+    #     #     result.append(choice(base_str))
+    #     # order_sn = "".join(result)
+    #     # return order_sn
+    #     from time import strftime
+    #     import random
+    #     #order_sn总长度为:时间戳12位，随机数字2位，用户ID取后4位 总计18位
+    #     user_id = self.request.user.id
+    #     if len(str(user_id) > 4):
+    #         user_id = str(user_id)[:-4]
+    #     else:
+    #         user_id = str(user_id).zfill(4)
+    #     order_sn = "{time_str}{user}{random_str}".format(time_str=strftime("%Y%m%d%H%M%S"), user=user_id,
+    #                                                      random_str=random.randint(10, 99))
+    #     return order_sn
+    #
+    # def perform_create(self, serializer):
+    #     serializer.validated_data["order_sn"] = self.generate_order_sn()
+    #     return serializer.save()
 
     def perform_create(self, serializer):
-        return serializer.save()
+        shop_carts = ShoppingTrade.objects.filter(user=self.request.user)
+        if shop_carts:
+            order = serializer.save()
+            for shop_cart in shop_carts:
+                ordergood = OrderGoods()
+                ordergood.goods = shop_cart.goods
+                ordergood.goods_num = shop_cart.goods_num
+                ordergood.order_sn = order
+                print order
+                ordergood.save()
+
+                shop_cart.delete()
+            return order
+        else:
+            raise serializers.ValidationError("没有需要购买的商品")

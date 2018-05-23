@@ -44,9 +44,9 @@ class OrderInfoAdmin(object):
 
 
 class OrderGoodsAdmin(object):
-    fields = ['good_sn', 'goods', 'goods_num', 'add_time']
-    search_fields = ['add_time', 'good_sn', 'goods']
-    list_filter = ['good_sn', 'goods', 'goods_num', 'add_time']
+    fields = ['order_sn', 'goods', 'goods_num', 'add_time']
+    search_fields = ['add_time', 'order_sn', 'goods']
+    list_filter = ['order_sn', 'goods', 'goods_num', 'add_time']
 
 xadmin.site.register(ShoppingTrade, ShoppingTradeAdmin)
 xadmin.site.register(OrderInfo, OrderInfoAdmin)

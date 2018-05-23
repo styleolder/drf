@@ -14,10 +14,10 @@ class ShoppingTrade(models.Model):
     """
         购物车
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="用户")
-    goods = models.ForeignKey(Goods, verbose_name="商品")
-    goods_num = models.IntegerField(default=0, verbose_name="购买数量")
-    add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name="用户", help_text="用户")
+    goods = models.ForeignKey(Goods, verbose_name="商品", help_text="商品")
+    goods_num = models.IntegerField(default=0, verbose_name="购买数量", help_text="购买数量")
+    add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间", help_text="添加时间")
 
     class Meta:
         verbose_name = "购物车"
@@ -25,7 +25,8 @@ class ShoppingTrade(models.Model):
 
     def __str__(self):
         return self.goods.name
-        #return "%s(%d)".format(self.goods.name, self.goods_num)
+        # return "%s(%d)".format(self.goods.name, self.goods_num)
+
 
 @python_2_unicode_compatible
 class OrderInfo(models.Model):
@@ -39,9 +40,9 @@ class OrderInfo(models.Model):
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     order_sn = models.CharField(max_length=100, verbose_name="订单编号", null=True, blank=True)
-    trade_no = models.CharField(max_length=100, unique=True, null=True, blank=True, verbose_name="第三方订单编号")
-    pay_status = models.CharField(max_length=10, choices=ORDER_STATUS, verbose_name="订单状态")
-    pay_time = models.DateTimeField(verbose_name="支付时间")
+    trade_no = models.CharField(max_length=100, null=True, blank=True, verbose_name="第三方订单编号")
+    pay_status = models.CharField(default="wait", max_length=10, choices=ORDER_STATUS, verbose_name="订单状态")
+    pay_time = models.DateTimeField(null=True, blank=True, verbose_name="支付时间")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
     address = models.CharField(max_length=200, verbose_name="地址")
     signer_name = models.CharField(max_length=50, verbose_name="收件人姓名")
@@ -61,7 +62,7 @@ class OrderGoods(models.Model):
     """
         订单详情
     """
-    good_sn = models.ForeignKey(OrderInfo)
+    order_sn = models.ForeignKey(OrderInfo)
     goods = models.ForeignKey(Goods)
     goods_num = models.IntegerField(default=0, verbose_name="商品数量")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
@@ -71,5 +72,5 @@ class OrderGoods(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.good_sn
+        return self.order_sn.order_sn
 

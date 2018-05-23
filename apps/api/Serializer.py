@@ -10,7 +10,8 @@ from rest_framework.validators import UniqueTogetherValidator
 
 import re
 from datetime import datetime, timedelta
-
+from time import strftime
+import random
 # class GoodsSerializer(serializers.Serializer):
 # name = serializers.CharField()
 # good_sn = serializers.CharField()
@@ -37,6 +38,7 @@ class GoodCategorySerializer2(serializers.ModelSerializer):
 
 class GoodCategorySerializer3(serializers.ModelSerializer):
     sub_name = GoodCategorySerializer(many=True)
+
     class Meta:
         model = GoodCategory
         fields = "__all__"
@@ -65,7 +67,7 @@ class UserFavSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFav
         fields = ("user", "goods", "id")
-        #增加联合验证，保证一个用户收藏同种商品只有一次
+        # 增加联合验证，保证一个用户收藏同种商品只有一次
         validators = [
             UniqueTogetherValidator(
                 queryset=UserFav.objects.all(),
@@ -81,7 +83,9 @@ class UserFavReSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserFav
         fields = ("goods", "id")
-        #增加联合验证，保证一个用户收藏同种商品只有一次
+        # 增加联合验证，保证一个用户收藏同种商品只有一次
+
+
 # 自定义用户输入验证
 
 
@@ -134,7 +138,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-    #取值验证
+    # 取值验证
     def validate_code(self, code):
         reg_num = "[0-9]{6}"
         if not re.match(reg_num, code):
@@ -150,13 +154,13 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError("验证码错误")
 
-    #整体的值验证，所有的值已dict的形式存储在attrs中
+    # 整体的值验证，所有的值已dict的形式存储在attrs中
     def validate(self, attrs):
         attrs["mobile"] = attrs["username"]
         del attrs["code"]
         return attrs
 
-    #设置关联的model与需要操作的字段
+    # 设置关联的model与需要操作的字段
     class Meta:
         model = UserProfile
         fields = ('username', 'mobile', 'code', 'password')
@@ -172,7 +176,7 @@ class ShoppingTradeSerializer(serializers.Serializer):
     """
         自定义Serializer
     """
-    #自动填充请求数据的用户，会被数据保存到self.context['request']中
+    # 自动填充请求数据的用户，会被数据保存到self.context['request']中
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -182,9 +186,9 @@ class ShoppingTradeSerializer(serializers.Serializer):
     })
     goods = serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all(), required=True)
 
-    #自定serializer的create方法
+    # 自定serializer的create方法
     def create(self, validated_data):
-        #获取当前用户从serializers.HiddenField(
+        # 获取当前用户从serializers.HiddenField(
         #serializers.CurrentUserDefault()
         #)中得到
         user = self.context['request'].user
@@ -216,7 +220,36 @@ class ShoppingTradeReSerializer(serializers.ModelSerializer):
         model = ShoppingTrade
         fields = "__all__"
 
+
 class OrderInfoSerializer(serializers.ModelSerializer):
+    #自动填充user
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    # order_sn总长度为:时间戳12位，随机数字2位，用户ID取后4位 总计18位
+    order_sn = serializers.CharField(read_only=True)
+    trade_no = serializers.CharField(read_only=True)
+    pay_time = serializers.DateTimeField(read_only=True)
+    add_time = serializers.DateTimeField(read_only=True)
+    pay_status = serializers.CharField(read_only=True)
+
+    def generate_order_sn(self):
+        user_id = self.context["request"].user.id
+        if len(str(user_id)) > 4:
+            user_id = str(user_id)[:-4]
+        else:
+            user_id = str(user_id).zfill(4)
+
+        order_sn = "{time_str}{user}{random_str}".format(time_str=strftime("%Y%m%d%H%M%S"), user=user_id,
+                                                         random_str=random.randint(10, 99))
+        return order_sn
+
+    def validate(self, attrs):
+        attrs["order_sn"] = self.generate_order_sn()
+        return attrs
+
     class Meta:
         model = OrderInfo
         fields = "__all__"
+
+
