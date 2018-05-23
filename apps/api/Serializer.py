@@ -5,7 +5,7 @@ from rest_framework.validators import UniqueValidator
 from goods.models import Goods, GoodCategory, GoodsImage
 from users.models import VerifyCode, UserProfile
 from user_opration.models import UserFav, UserAddress
-from trade.models import ShoppingTrade, OrderInfo
+from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from rest_framework.validators import UniqueTogetherValidator
 
 import re
@@ -221,9 +221,17 @@ class ShoppingTradeReSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class OrderGoodsSerializer(serializers.ModelSerializer):
+    goods = GoodsSerializer2()
+
+    class Meta:
+        model = OrderGoods
+        fields = "__all__"
+
+
 class OrderInfoReSerializer(serializers.ModelSerializer):
     #todo
-    goods = ShoppingTradeReSerializer(many=False)
+    goods = OrderGoodsSerializer(many=True)
 
     class Meta:
         model = OrderInfo

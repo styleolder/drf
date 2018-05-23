@@ -62,7 +62,7 @@ class OrderGoods(models.Model):
     """
         订单详情
     """
-    order_sn = models.ForeignKey(OrderInfo)
+    order_sn = models.ForeignKey(OrderInfo, related_name="goods")
     goods = models.ForeignKey(Goods)
     goods_num = models.IntegerField(default=0, verbose_name="商品数量")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
