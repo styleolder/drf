@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from goods.models import Goods, GoodCategory, GoodsImage
 from users.models import VerifyCode, UserProfile
-from user_opration.models import UserFav
+from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -246,6 +246,16 @@ class OrderInfoSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs["order_sn"] = self.generate_order_sn()
+        if attrs["address"] == "" and attrs["signer_name"] == "" and attrs["signer_mobile"] == "":
+            default_address = UserAddress.objects.filter(user=self.context["request"].user, is_default=True)
+            if default_address.count() == 1:
+                attrs["address"] = default_address[0].address
+                attrs["signer_name"] = default_address[0].signer_name
+                attrs["signer_mobile"] = default_address[0].signer_mobile
+            else:
+                raise serializers.ValidationError("请先填写默认的收货信息 or 输入完整的收货信息")
+        elif attrs["address"] == "" or attrs["signer_name"] == "" or attrs["signer_mobile"] == "":
+            raise serializers.ValidationError("请检查收货信息的完整性")
         return attrs
 
     class Meta:
@@ -253,3 +263,12 @@ class OrderInfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class UserAddressSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    add_time = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = UserAddress
+        fields = "__all__"

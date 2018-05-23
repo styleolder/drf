@@ -44,9 +44,9 @@ class OrderInfo(models.Model):
     pay_status = models.CharField(default="wait", max_length=10, choices=ORDER_STATUS, verbose_name="订单状态")
     pay_time = models.DateTimeField(null=True, blank=True, verbose_name="支付时间")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
-    address = models.CharField(max_length=200, verbose_name="地址")
-    signer_name = models.CharField(max_length=50, verbose_name="收件人姓名")
-    signer_mobile = models.CharField(max_length=11, verbose_name="收件人电话")
+    address = models.CharField(null=True, blank=True, max_length=200, verbose_name="地址")
+    signer_name = models.CharField(null=True, blank=True, max_length=50, verbose_name="收件人姓名")
+    signer_mobile = models.CharField(null=True, blank=True, max_length=11, verbose_name="收件人电话")
     bbs = models.CharField(max_length=50, verbose_name="订单留言", null=True, blank=True)
 
     class Meta:

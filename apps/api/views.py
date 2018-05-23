@@ -8,7 +8,8 @@ from .Serializer import GoodsSerializer2, GoodCategorySerializer3, \
     UserFavSerializer, UserProfileSerializer, \
     UserFavReSerializer, \
     ShoppingTradeSerializer, \
-    ShoppingTradeReSerializer, OrderInfoSerializer
+    ShoppingTradeReSerializer, OrderInfoSerializer,\
+    UserAddressSerializer
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -22,7 +23,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from users.models import UserProfile, VerifyCode
-from user_opration.models import UserFav
+from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from random import choice
 # class GoodsListView(APIView):
@@ -284,10 +285,38 @@ class OrderInfoSerializerViewSet(viewsets.ModelViewSet):
                 ordergood.goods = shop_cart.goods
                 ordergood.goods_num = shop_cart.goods_num
                 ordergood.order_sn = order
-                print order
                 ordergood.save()
 
                 shop_cart.delete()
             return order
         else:
             raise serializers.ValidationError("没有需要购买的商品")
+
+
+class UserAddressViewSet(viewsets.ModelViewSet):
+    """
+        订单信息
+    """
+    serializer_class = UserAddressSerializer
+    authentication_classes = (TokenAuthentication, SessionAuthentication)
+    permission_classes = (
+        IsAuthenticated,
+        IsOwnerOrReadOnly
+    )
+    #首先会验证queryset，然后才会重写
+    queryset = UserAddress.objects.all()
+
+    #重写queryset
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        address_default = UserAddress.objects.filter(user=self.request.user, is_default=True)
+        user_address = UserAddress.objects.filter(user=self.request.user)
+        if serializer.validated_data['is_default']:
+            if user_address.count() >= 5:
+                raise serializers.ValidationError("添加地址最多为5个")
+            elif address_default.count() >= 1:
+                    address_default.update(is_default=False)
+
+        return serializer.save()
