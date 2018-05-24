@@ -321,7 +321,11 @@ class IndexGoodCategorySerializer(serializers.ModelSerializer):
         all_goods = Goods.objects.filter(Q(category_id=obj.id) | Q(category__parent_category__id=obj.id) | Q(
             category__parent_category__parent_category__id=obj.id))
         #定义queryset，Serializer2
-        goods_serializer = GoodsSerializer(all_goods, many=True)
+        #自定义Serializer中嵌套Serializer，不会补全URL地址
+        #列入:/static/images/1.jpg
+        #添加上下文关联才会自动补全
+        #context = {'request':self.context['request']}
+        goods_serializer = GoodsSerializer(all_goods, many=True,context = {'request':self.context['request']})
         #返回json数据
         return goods_serializer.data
 
