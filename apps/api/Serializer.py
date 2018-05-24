@@ -7,7 +7,7 @@ from users.models import VerifyCode, UserProfile
 from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from rest_framework.validators import UniqueTogetherValidator
-from django.db.models import Q
+from django.db.models import Q,F
 import re
 from datetime import datetime, timedelta
 from time import strftime
@@ -68,10 +68,19 @@ class GoodsSerializer(serializers.ModelSerializer):
         model = Goods
         fields = "__all__"
 
+
 class UserFavSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+
+    def create(self, validated_data):
+        userfav = super(UserFavSerializer, self).create(validated_data=validated_data)
+        print validated_data["goods"].id
+        Goods.objects.filter(id=validated_data["goods"].id).update(fav_num=F('fav_num')+1)
+        userfav.save()
+        return userfav
+
 
     class Meta:
         model = UserFav
@@ -93,7 +102,6 @@ class UserFavReSerializer(serializers.ModelSerializer):
         model = UserFav
         fields = ("goods", "id")
         # 增加联合验证，保证一个用户收藏同种商品只有一次
-
 
 # 自定义用户输入验证
 
@@ -201,7 +209,7 @@ class ShoppingTradeSerializer(serializers.Serializer):
         # serializers.CurrentUserDefault()
         # )中得到
         user = self.context['request'].user
-        #validated_data 是上面定义的model form的dict
+        # validated_data 是上面定义的model form的dict
         goods_num = validated_data['goods_num']
         #goods由于是外键的原因，其实goods是一个对象
         goods = validated_data['goods']
@@ -313,7 +321,7 @@ class BannerSerializer(serializers.ModelSerializer):
 class IndexGoodCategorySerializer(serializers.ModelSerializer):
     # 自定义modelform
     goods = serializers.SerializerMethodField()
-    #限定为二级分类
+    # 限定为二级分类
     # sub_name = GoodCategorySerializer2(many=True)
 
     #填写具体的取值
@@ -325,7 +333,7 @@ class IndexGoodCategorySerializer(serializers.ModelSerializer):
         #列入:/static/images/1.jpg
         #添加上下文关联才会自动补全
         #context = {'request':self.context['request']}
-        goods_serializer = GoodsSerializer(all_goods, many=True,context = {'request':self.context['request']})
+        goods_serializer = GoodsSerializer(all_goods, many=True, context={'request': self.context['request']})
         #返回json数据
         return goods_serializer.data
 
