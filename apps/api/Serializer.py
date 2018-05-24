@@ -2,12 +2,12 @@
 __author__ = 'style'
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from goods.models import Goods, GoodCategory, GoodsImage
+from goods.models import Goods, GoodCategory, GoodsImage, Banner
 from users.models import VerifyCode, UserProfile
 from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from rest_framework.validators import UniqueTogetherValidator
-
+from django.db.models import Q
 import re
 from datetime import datetime, timedelta
 from time import strftime
@@ -22,6 +22,8 @@ import random
 # Create and return a new `Snippet` instance, given the validated data.
 # """
 # return Goods.objects.create(**validated_data)
+
+
 class GoodCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodCategory
@@ -58,6 +60,13 @@ class GoodsSerializer2(serializers.ModelSerializer):
         model = Goods
         fields = "__all__"
 
+
+class GoodsSerializer(serializers.ModelSerializer):
+    category = GoodCategorySerializer()
+
+    class Meta:
+        model = Goods
+        fields = "__all__"
 
 class UserFavSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
@@ -189,8 +198,8 @@ class ShoppingTradeSerializer(serializers.Serializer):
     # 自定serializer的create方法
     def create(self, validated_data):
         # 获取当前用户从serializers.HiddenField(
-        #serializers.CurrentUserDefault()
-        #)中得到
+        # serializers.CurrentUserDefault()
+        # )中得到
         user = self.context['request'].user
         #validated_data 是上面定义的model form的dict
         goods_num = validated_data['goods_num']
@@ -241,7 +250,7 @@ class OrderInfoReSerializer(serializers.ModelSerializer):
 
 
 class OrderInfoSerializer(serializers.ModelSerializer):
-    #自动填充user
+    # 自动填充user
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -290,4 +299,32 @@ class UserAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAddress
+        fields = "__all__"
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    add_time = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Banner
+        fields = "__all__"
+
+
+class IndexGoodCategorySerializer(serializers.ModelSerializer):
+    # 自定义modelform
+    goods = serializers.SerializerMethodField()
+    #限定为二级分类
+    # sub_name = GoodCategorySerializer2(many=True)
+
+    #填写具体的取值
+    def get_goods(self, obj):
+        all_goods = Goods.objects.filter(Q(category_id=obj.id) | Q(category__parent_category__id=obj.id) | Q(
+            category__parent_category__parent_category__id=obj.id))
+        #定义queryset，Serializer2
+        goods_serializer = GoodsSerializer(all_goods, many=True)
+        #返回json数据
+        return goods_serializer.data
+
+    class Meta:
+        model = GoodCategory
         fields = "__all__"

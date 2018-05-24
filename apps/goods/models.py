@@ -111,10 +111,12 @@ class Banner(models.Model):
     image = models.ImageField(upload_to="", verbose_name="轮播图", blank=True)
     index = models.IntegerField(default=100, verbose_name="轮播图权重")
     add_time = models.DateTimeField(default=datetime.now, verbose_name="添加时间")
+    desc = models.CharField(default="", blank=True, null=True, max_length=50, verbose_name="描述信息")
 
     class Meta:
         verbose_name = "首页轮播图"
         verbose_name_plural = verbose_name
+        ordering = ["index", "-add_time"]
 
     def __str__(self):
         return self.goods.name

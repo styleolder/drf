@@ -9,7 +9,9 @@ from .Serializer import GoodsSerializer2, GoodCategorySerializer3, \
     UserFavReSerializer, \
     ShoppingTradeSerializer, \
     ShoppingTradeReSerializer, OrderInfoSerializer,\
-    UserAddressSerializer, OrderInfoReSerializer
+    UserAddressSerializer, OrderInfoReSerializer,\
+    BannerSerializer, IndexGoodCategorySerializer
+
 from rest_framework import status
 from rest_framework import mixins, generics
 from rest_framework import viewsets
@@ -25,6 +27,8 @@ from rest_framework.authentication import TokenAuthentication, BasicAuthenticati
 from users.models import UserProfile, VerifyCode
 from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo, OrderGoods
+from goods.models import Banner
+
 from random import choice
 # class GoodsListView(APIView):
 # """
@@ -100,7 +104,8 @@ class GoodCategoryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, view
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     order_fields = ("code",)
 
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, BasicAuthentication, SessionAuthentication)
     permission_classes = (
         IsAuthenticated,
     )
@@ -326,3 +331,19 @@ class UserAddressViewSet(viewsets.ModelViewSet):
                     address_default.update(is_default=False)
 
         return serializer.save()
+
+
+class BannerViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+        首页轮播图
+    """
+    serializer_class = BannerSerializer
+    queryset = Banner.objects.all()
+
+
+class IndexGoodCategoryViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+        分类商品显示
+    """
+    serializer_class = IndexGoodCategorySerializer
+    queryset = GoodCategory.objects.all()

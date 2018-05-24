@@ -12,7 +12,7 @@ class BaseSetting(object):
 class GoodCategoryAdmin(object):
     fields = ['name', 'code', 'desc', 'category_type', 'parent_category', 'add_time', 'is_table']
     search_fields = ['name', 'code']
-    list_filter = ['add_time']
+    list_filter = ['add_time','category_type']
 
     list_display = (
         'name',
@@ -21,7 +21,12 @@ class GoodCategoryAdmin(object):
         'parent_category',
         'add_time'
     )
-
+    #自定义在xadmin里显示
+    # def get_context(self):
+    #     context = super(GoodCategoryAdmin, self).get_context()
+    #     if 'form' in context:
+    #         context['form'].fields["parent_category"].queryset = GoodCategory.objects.filter(category_type="1")
+    #     return context
 
 class GoodsCategoryBrandAdmin(object):
     fields = ['name', 'desc', 'images', 'add_time']
@@ -84,9 +89,9 @@ class GoodsImageAdmin(object):
 
 
 class BannerAdmin(object):
-    fields = ['goods', 'image', 'index', 'add_time']
+    fields = ['goods', 'image', 'index', 'add_time', 'desc']
     list_filter = ['goods']
-    search_fields = ['goods', 'image', 'index', 'add_time']
+    search_fields = ['goods', 'index', 'add_time']
 
 
 class GlobalSettings(object):
