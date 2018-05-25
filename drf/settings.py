@@ -160,6 +160,16 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+
+    #限速设置
+     'DEFAULT_THROTTLE_CLASSES': (
+            'rest_framework.throttling.AnonRateThrottle',   #未登陆用户
+            'rest_framework.throttling.UserRateThrottle'    #登陆用户
+        ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '3/minute',         #每分钟可以请求两次
+        'user': '5/minute'          #每分钟可以请求五次
+    }
 }
 #添加自定义认证的字段
 AUTHENTICATION_BACKENDS = (
@@ -167,8 +177,27 @@ AUTHENTICATION_BACKENDS = (
 )
 #设置JWT token过期时间
 import datetime
-JWT_AUTH  = {
+JWT_AUTH = {
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
     #默认是JWT
     'JWT_AUTH_HEADER_PREFIX': 'JWT'
+}
+
+##设置DRF的缓存
+REST_FRAMEWORK_EXTENSIONS = {
+    'DEFAULT_OBJECT_CACHE_KEY_FUNC':
+      'rest_framework_extensions.utils.default_object_cache_key_func',
+    'DEFAULT_LIST_CACHE_KEY_FUNC':
+      'rest_framework_extensions.utils.default_list_cache_key_func',
+     'DEFAULT_CACHE_RESPONSE_TIMEOUT': 5*60
+}
+#设置DRF缓存数据保存在redis中
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.1.13:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }

@@ -28,7 +28,11 @@ from users.models import UserProfile, VerifyCode
 from user_opration.models import UserFav, UserAddress
 from trade.models import ShoppingTrade, OrderInfo, OrderGoods
 from goods.models import Banner
+#添加限速设置
+from rest_framework.throttling import UserRateThrottle,AnonRateThrottle
 
+#添加缓存类
+from rest_framework_extensions.cache.mixins import CacheResponseMixin
 from random import choice
 # class GoodsListView(APIView):
 # """
@@ -55,7 +59,7 @@ from random import choice
 #         return self.list(request, *args, **kwargs)
 
 
-class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class GoodsViewSet(CacheResponseMixin,mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
         获取商品详细信息
     """
@@ -66,6 +70,8 @@ class GoodsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
     filter_class = ProFilter
     search_fields = ("name",)
     order_fields = ("good_sn",)
+    #关联定义的限速类
+    throttle_classes = (UserRateThrottle, AnonRateThrottle)
 
     #重新定义retrieve方法
     def retrieve(self, request, *args, **kwargs):
@@ -99,6 +105,7 @@ class UserFavViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Retr
         elif self.action == "retrieve":
             return UserFavReSerializer
         return UserFavSerializer
+
 
     def get_queryset(self):
         return UserFav.objects.filter(user=self.request.user)
